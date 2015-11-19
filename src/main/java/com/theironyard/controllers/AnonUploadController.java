@@ -27,15 +27,29 @@ public class AnonUploadController {
     }
 
     @RequestMapping("/upload")
-    public void upload(HttpServletResponse response, MultipartFile file) throws IOException {
+    public void upload(HttpServletResponse response, MultipartFile file, boolean isPerm, String description)
+            throws Exception {
         File f = File.createTempFile("file",file.getOriginalFilename(), new File("public"));
         FileOutputStream fos = new FileOutputStream(f);
         fos.write(file.getBytes());
 
-        AnonFile anonFile = new AnonFile();
-        anonFile.originalName = file.getOriginalFilename();
-        anonFile.name = f.getName();
+       if (files.findAllisNotPerm().size()==3){
+            List<AnonFile> setList = files.findAllisNotPerm();
+            AnonFile fileRemove = setList.get(0);
+            File tempFile = new File("public", fileRemove.name);
+            files.delete(fileRemove);
+            tempFile.delete();
+        }
+
+            AnonFile anonFile = new AnonFile();
+            anonFile.originalName = file.getOriginalFilename();
+            anonFile.name = f.getName();
+            anonFile.isPerm = isPerm;
+            anonFile.description = description;
+
+
         files.save(anonFile);
+
 
         response.sendRedirect("/");
     }
